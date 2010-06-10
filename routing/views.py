@@ -35,6 +35,7 @@ def show_shortest_path(request, start, end):
     if not paths:
         return HttpResponse("Path not found")
     routes = []
+    no = 0
     for path in paths:
         stages = [Stage.objects.get(id=sid) for sid in path]
         changeovers = []
@@ -47,7 +48,9 @@ def show_shortest_path(request, start, end):
                 routes=soft_routes_between(startStage, endStage))
             changeovers.append(rc)
         routes.append({
+                'no':no,
                 'changeovers':changeovers})
+        no = no + 1
 
     return direct_to_template(request, "show_shortest_path.html",
                               {'paths': routes,

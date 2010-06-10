@@ -45,6 +45,17 @@ var style_green = {
     pointRadius: 15,
     pointerEvents: "visiblePainted"
 }
+function showpath(path_no)
+{
+   for(var i=0;i<layerStages.length;i++)
+   {
+      layerStages[i].setVisibility(false);
+      layerRoute[i].setVisibility(false);      
+   }
+   layerStages[path_no].setVisibility(true);
+   layerRoute[path_no].setVisibility(true);
+}
+
 $(document).ready(function() {
             map = new OpenLayers.Map ("map", {
                 controls:[
@@ -60,45 +71,53 @@ $(document).ready(function() {
                 displayProjection: new OpenLayers.Projection("EPSG:4326")
             } );
             var layerMapnik = new OpenLayers.Layer.OSM.Mapnik("Chennai");
-            layerStages = new OpenLayers.Layer.Markers("Stages");
-            var layerRoute = new OpenLayers.Layer.Vector("Route");
+            layerStages = []
+            layerStages[0] = new OpenLayers.Layer.Markers("Route1 Stages");
+            layerStages[1] = new OpenLayers.Layer.Markers("Route2 Stages",{visibility:false});
+            layerStages[2] = new OpenLayers.Layer.Markers("Route3 Stages",{visibility:false});
+            layerRoute = [];
+            layerRoute[0] = new OpenLayers.Layer.Vector("Route1 Lines");
+            layerRoute[1] = new OpenLayers.Layer.Vector("Route2 Lines",{visibility:false});
+            layerRoute[2] = new OpenLayers.Layer.Vector("Route3 Lines",{visibility:false});
             map.addLayer(layerMapnik);
-            map.addLayer(layerRoute);
-            map.addLayer(layerStages);
+            map.addLayer(layerRoute[0]);
+            map.addLayer(layerRoute[1]);
+            map.addLayer(layerRoute[2]);
+            map.addLayer(layerStages[0]);
+            map.addLayer(layerStages[1]);
+            map.addLayer(layerStages[2]);
             var start_point;
             var end_point;
-            var path_no = 0;
             {% for path in paths %}
-               if(path_no==0) {
+               if({{path.no}}==0) {
                   style_color = style_black;
                }
-               else if(path_no==1) {
+               else if({{path.no}}==1) {
                   style_color = style_red;
                }
-               else if(path_no==2) {
+               else if({{path.no}}==2) {
                   style_color = style_blue;
                }
                else {
                   style_color = style_green;
                }
-               path_no = path_no + 1;
                
                {% for co in path.changeovers %}
                   var points = [];
-                  addStage({{co.start_stage.location.y}},{{co.start_stage.location.x}},{{co.start_stage.id}},'{{co.start_stage.display_name}}');
-                  addStage({{co.end_stage.location.y}},{{co.end_stage.location.x}},{{co.end_stage.id}},'{{co.end_stage.display_name}}');
+                  addStage({{co.start_stage.location.y}},{{co.start_stage.location.x}},{{co.start_stage.id}},'{{co.start_stage.display_name}}',{{path.no}});
+                  addStage({{co.end_stage.location.y}},{{co.end_stage.location.x}},{{co.end_stage.id}},'{{co.end_stage.display_name}}',{{path.no}});
                   start_point = new OpenLayers.Geometry.Point({{co.start_stage.location.x}},{{co.start_stage.location.y}}).transform(new OpenLayers.Projection("EPSG:4326"),map.getProjectionObject());
                   points.push(start_point);
                   end_point = new OpenLayers.Geometry.Point({{co.end_stage.location.x}},{{co.end_stage.location.y}}).transform(new OpenLayers.Projection("EPSG:4326"),map.getProjectionObject());
                   points.push(end_point);
-                  layerRoute.addFeatures(new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString(points),null,style_color));
+                  layerRoute[{{path.no}}].addFeatures(new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString(points),null,style_color));
                {% endfor %}
             {% endfor %}
-            map.zoomToExtent(layerRoute.getDataExtent());
+            map.zoomToExtent(layerRoute[0].getDataExtent());
             var lonLat = new OpenLayers.LonLat(lon, lat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
     });
 
-function addStage(lat,lon,id,name) {
+function addStage(lat,lon,id,name,path_no) {
     var marker = new OpenLayers.Marker(new OpenLayers.LonLat(lon,lat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject()), icon.clone());
     marker.events.register("mouseover", marker, function(e){
 		$("#from").attr("value",name);
@@ -113,7 +132,7 @@ function addStage(lat,lon,id,name) {
 		window.location = "/chennai/stage/" + id;
 		OpenLayers.Event.stop(e);
 		});
-    layerStages.addMarker(marker);
+    layerStages[path_no].addMarker(marker);
 }
 
 {% endblock %}
@@ -129,6 +148,9 @@ function addStage(lat,lon,id,name) {
 	<div class="leftCol">
 	  {% for p in paths %}
 	  <div>
+	   <div class="path_link" onclick="showpath({{p.no}});">
+	   Click to See path
+	   </div>
 		{% for co in p.changeovers %}
 		<h3>
 			From
