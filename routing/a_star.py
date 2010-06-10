@@ -20,7 +20,9 @@ from stages.models import Stage
 H = marshal.load(open(os.path.join(settings.ROOT_DIR, 'distancegraph'),'rb'))
 G = marshal.load(open(os.path.join(settings.ROOT_DIR, 'adjacencygraph'),'rb'))
 
+
 came_from = {}                    # A linked list structure that remembers the path built
+
 # DM = Multiplier of Distance when computing heuristic
 # 'change overs is minimized' < DM < 'distance is minimized'
 DM = 1
@@ -40,19 +42,20 @@ def get_heuristic(start_stage, end_stage):
       route_count = G[start_stage][end_stage]
    dist = H[start_stage][end_stage]
    heuristic = DM*dist - IM*(Stage.objects.get(pk=start_stage).importance) - RM*route_count
-   return heuristic   
-
+   return heuristic
 def get_distance(stage1,stage2):
    if not H[stage1].has_key(stage2):
       return 100000 # Some large value, ideally Infinity
    return H[stage1][stage2]
 
-def A_star(start, goal):
+def A_star(start, goal, alternatives=3):
    closedset = []                 # The set of nodes already evaluated.     
    openset = [start]              # The set of tentative nodes to be evaluated.
    g_score = {}                   # Distance from start along optimal path.
    h_score = {}                   # Heuristic distance to goal.
    f_score = {}                   # Estimated total distance from start to goal through y.
+   paths = []
+   cur_alt = 0
    g_score[start] = 0 
    h_score[start] = get_heuristic(start,goal)     
    f_score[start] = h_score[start]
@@ -72,11 +75,16 @@ def A_star(start, goal):
             H[s]
          path.append(start)
          path.reverse()   
-         return path
-         
-      openset.remove(x)
-      closedset.append(x)
-         
+         paths.append(path)
+         cur_alt = cur_alt + 1
+         if cur_alt >= alternatives:
+            return paths
+         openset.remove(x)
+         continue
+      else:
+         openset.remove(x)
+         closedset.append(x)
+        
       for y in G[x]:
          if y in closedset:
             continue
@@ -85,6 +93,7 @@ def A_star(start, goal):
          if y not in openset:
             openset.append(y)
             tentative_is_better = True
+            h_score[y] = get_heuristic(y, goal)
          elif tentative_g_score < g_score[y]:
             tentative_is_better = True
          else:
@@ -93,14 +102,10 @@ def A_star(start, goal):
          if tentative_is_better == True:
             came_from[y] = x
             g_score[y] = tentative_g_score
-            h_score[y] = get_heuristic(y, goal)
             f_score[y] = g_score[y] + h_score[y] 
    return None
 
 if __name__ == "__main__":
-   setup_environment()
-   from stages.models import Stage
-   G = marshal.load(open(os.path.join(settings.ROOT_DIR,'adjacencygraph'),'rb'))
-   H = marshal.load(open(os.path.join(settings.ROOT_DIR,'distancegraph'),'rb'))
-   path = A_star(int(sys.argv[1]),int(sys.argv[2]))
-   print [Stage.objects.get(pk=sid) for sid in path]
+   paths = A_star(int(sys.argv[1]),int(sys.argv[2]),3)
+   for path in paths:
+      print [Stage.objects.get(pk=sid) for sid in path]

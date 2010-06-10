@@ -13,7 +13,7 @@ var softlink_stage_icon = new OpenLayers.Icon("/static/images/softlink_stage_22.
 var near_by_stage_icon = new OpenLayers.Icon("/static/images/near_by_stage_22.png",iconSize,iconOffset);
 var map;
 var marker;
-OpenLayers.Control.Click = OpenLayers.Class(OpenLayers.Control, {
+OpenLayers.Control.Click = OpenLayers.Class(OpenLayers.Control, {                
                 defaultHandlerOptions: {
                     'single': true,
                     'double': false,
@@ -28,13 +28,13 @@ OpenLayers.Control.Click = OpenLayers.Class(OpenLayers.Control, {
                     );
                     OpenLayers.Control.prototype.initialize.apply(
                         this, arguments
-                    );
+                    ); 
                     this.handler = new OpenLayers.Handler.Click(
                         this, {
                             'click': this.trigger
                         }, this.handlerOptions
                     );
-                },
+                }, 
 
                 trigger: function(e) {
                     marker.display(true);
@@ -64,9 +64,9 @@ $(document).ready(function() {
             } );
             var layerMapnik = new OpenLayers.Layer.OSM.Mapnik("Openstreetmap Mapnik");
             var layerOsmarender = new OpenLayers.Layer.OSM.Osmarender("Openstreetmap Osmarender");
-            var layerStages = new OpenLayers.Layer.Markers("Stages");
-            var layerSoftlinks = new OpenLayers.Layer.Markers("Softlinks");
-            var layerNearbyStages = new OpenLayers.Layer.Markers("Near by stages");
+         	var layerStages = new OpenLayers.Layer.Markers("Stages");
+         	var layerSoftlinks = new OpenLayers.Layer.Markers("Softlinks");
+         	var layerNearbyStages = new OpenLayers.Layer.Markers("Near by stages");
             map.addLayer(layerMapnik);
             map.addLayer(layerOsmarender);
             map.addLayer(layerNearbyStages);
@@ -74,7 +74,7 @@ $(document).ready(function() {
             map.addLayer(layerStages);
             {% if stage.location %}
               lat = {{ stage.location.y }};
-              lon = {{ stage.location.x }};
+              lon = {{ stage.location.x }};      
               lonLat = new OpenLayers.LonLat(lon, lat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
               marker = new OpenLayers.Marker(lonLat,icon.clone());
               layerStages.addMarker(marker);
@@ -84,7 +84,7 @@ $(document).ready(function() {
               layerStages.addMarker(marker);
             {% endif %}
             marker.events.register("mouseover", marker, function(e){
-                 $('#from').attr('value','{{stage.display_name}}');
+            		$('#from').attr('value','{{stage.display_name}}');
 		            OpenLayers.Event.stop(e);
 		      });
             {% for sf in softlinks %}
@@ -92,8 +92,8 @@ $(document).ready(function() {
                marker = new OpenLayers.Marker(lonlat,softlink_stage_icon.clone())
                layerSoftlinks.addMarker(marker);
                marker.events.register("mouseover", marker, function(e){
-                  $('#from').attr('value','{{sf.display_name}}');
-		             OpenLayers.Event.stop(e);
+            		$('#from').attr('value','{{sf.display_name}}');
+		            OpenLayers.Event.stop(e);
 		         });
             {% endfor %}
             {% for ns in nearby_stages %}
@@ -101,12 +101,12 @@ $(document).ready(function() {
                var marker = new OpenLayers.Marker(lonlat,near_by_stage_icon.clone())
                layerNearbyStages.addMarker(marker);
                marker.events.register("mousedown", marker, function(e){
-                 $('#id_softlink_id').attr('value','{{ns.id}}');
-                 $('#softlink_form').submit();
+            		$('#id_softlink_id').attr('value','{{ns.id}}');
+            		$('#softlink_form').submit();
 		            OpenLayers.Event.stop(e);
 		         });
 		         marker.events.register("mouseover", marker, function(e){
-                 $('#from').attr('value','{{ns.display_name}}');
+            		$('#from').attr('value','{{ns.display_name}}');
 		            OpenLayers.Event.stop(e);
 		         });
             {% endfor %}
@@ -126,7 +126,7 @@ $(document).ready(function() {
 {% endblock %}
 
 {% block title %}
-Bus Stage: {{ stage.display_name }}
+Bus Stage: {{ stage.display_name }} 
 {% endblock %}
 
 {% block main %}
@@ -154,6 +154,6 @@ Bus Stage: {{ stage.display_name }}
 	<div class="clearfloat"></div>
 </div>
 <form method="POST" action="" id="softlink_form">
-{{form.softlink_id}}
+{{form.softlink_id}}   
 </form>
 {% endblock %}

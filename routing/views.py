@@ -19,7 +19,7 @@ def soft_routes_between(start, end):
     return Route.objects.filter(stages__id__in=[s.id for s in start.softlinks.all()]).filter(stages__id__in=[s.id for s in end.softlinks.all()])
 
 def direct_routes_between(start, end):
-    return Route.objects.filter(stages__id=start.id).filter(stages__id=end.id)  
+    return Route.objects.filter(stages__id=start.id).filter(stages__id=end.id)
 
 def find_distance(path):
     distance = 0
@@ -28,25 +28,28 @@ def find_distance(path):
     return distance
 
 def sort_route(route):
-    return 
-        
+    return
 
 def show_shortest_path(request, start, end):
-    path = A_star(int(start), int(end))
-    if not path:
+    paths = A_star(int(start), int(end))
+    if not paths:
         return HttpResponse("Path not found")
-    stages = [Stage.objects.get(id=sid) for sid in path]
-    changeovers = []
-    for i in xrange(0,len(stages) - 1):
-        startStage = stages[i]
-        endStage = stages[i+1]
-        rc = ChangeOver(
-            start_stage = startStage,
-            end_stage = endStage,
-            routes=direct_routes_between(startStage, endStage))
-        changeovers.append(rc)
+    routes = []
+    for path in paths:
+        stages = [Stage.objects.get(id=sid) for sid in path]
+        changeovers = []
+        for i in xrange(0,len(stages) - 1):
+            startStage = stages[i]
+            endStage = stages[i+1]
+            rc = ChangeOver(
+                start_stage = startStage,
+                end_stage = endStage,
+                routes=soft_routes_between(startStage, endStage))
+            changeovers.append(rc)
+        routes.append({
+                'changeovers':changeovers})
 
     return direct_to_template(request, "show_shortest_path.html",
-                              {'changeovers': changeovers,
+                              {'paths': routes,
                                'start_stage':Stage.objects.get(id=start),
                                'end_stage':Stage.objects.get(id=end)})

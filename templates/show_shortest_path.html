@@ -15,13 +15,36 @@ var layerStages;
 // Change info below to style the route line
 var style_black = {
     strokeColor: "#000000",
-    strokeOpacity: 0.5,
+    strokeOpacity: 0.7,
     strokeWidth: 4,
     strokeDashstyle: "solid",
     pointRadius: 15,
     pointerEvents: "visiblePainted"
                 };
-
+var style_red = {
+    strokeColor: "#ff0000",
+    strokeOpacity: 0.5,
+    strokeWidth: 4,
+    strokeDashstyle: "solid",
+    pointRadius: 15,
+    pointerEvents: "visiblePainted"
+}
+var style_blue = {
+    strokeColor: "#0000ff",
+    strokeOpacity: 0.5,
+    strokeWidth: 4,
+    strokeDashstyle: "solid",
+    pointRadius: 15,
+    pointerEvents: "visiblePainted"
+}
+var style_green = {
+    strokeColor: "#00ff00",
+    strokeOpacity: 0.5,
+    strokeWidth: 4,
+    strokeDashstyle: "solid",
+    pointRadius: 15,
+    pointerEvents: "visiblePainted"
+}
 $(document).ready(function() {
             map = new OpenLayers.Map ("map", {
                 controls:[
@@ -42,28 +65,35 @@ $(document).ready(function() {
             map.addLayer(layerMapnik);
             map.addLayer(layerRoute);
             map.addLayer(layerStages);
-            var points = [];
-            {% if start_stage.location %}
-                    var tempLat = {{start_stage.location.y}};
-                    var tempLon = {{start_stage.location.x}};
-                    addStage(tempLat, tempLon, {{start_stage.id}},'{{start_stage.display_name}}');
-                    points.push(new OpenLayers.Geometry.Point(tempLon, tempLat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject()));
-            {% endif %}
-            {% for co in changeovers %}
-                {% if co.start_stage.location %}
-                    var tempLat = {{co.start_stage.location.y}};
-                    var tempLon = {{co.start_stage.location.x}};
-                    addStage(tempLat, tempLon, {{co.start_stage.id}},'{{co.display_name}}');
-                    points.push(new OpenLayers.Geometry.Point(tempLon, tempLat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject()));
-                {% endif %}
+            var start_point;
+            var end_point;
+            var path_no = 0;
+            {% for path in paths %}
+               if(path_no==0) {
+                  style_color = style_black;
+               }
+               else if(path_no==1) {
+                  style_color = style_red;
+               }
+               else if(path_no==2) {
+                  style_color = style_blue;
+               }
+               else {
+                  style_color = style_green;
+               }
+               path_no = path_no + 1;
+               
+               {% for co in path.changeovers %}
+                  var points = [];
+                  addStage({{co.start_stage.location.y}},{{co.start_stage.location.x}},{{co.start_stage.id}},'{{co.start_stage.display_name}}');
+                  addStage({{co.end_stage.location.y}},{{co.end_stage.location.x}},{{co.end_stage.id}},'{{co.end_stage.display_name}}');
+                  start_point = new OpenLayers.Geometry.Point({{co.start_stage.location.x}},{{co.start_stage.location.y}}).transform(new OpenLayers.Projection("EPSG:4326"),map.getProjectionObject());
+                  points.push(start_point);
+                  end_point = new OpenLayers.Geometry.Point({{co.end_stage.location.x}},{{co.end_stage.location.y}}).transform(new OpenLayers.Projection("EPSG:4326"),map.getProjectionObject());
+                  points.push(end_point);
+                  layerRoute.addFeatures(new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString(points),null,style_color));
+               {% endfor %}
             {% endfor %}
-            {% if end_stage.location %}
-                    var tempLat = {{end_stage.location.y}};
-                    var tempLon = {{end_stage.location.x}};
-                    addStage(tempLat, tempLon, {{end_stage.id}},'{{end_stage.display_name}}');
-                    points.push(new OpenLayers.Geometry.Point(tempLon, tempLat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject()));
-            {% endif %}
-            layerRoute.addFeatures(new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString(points),null,style_black));
             map.zoomToExtent(layerRoute.getDataExtent());
             var lonLat = new OpenLayers.LonLat(lon, lat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
     });
@@ -71,7 +101,8 @@ $(document).ready(function() {
 function addStage(lat,lon,id,name) {
     var marker = new OpenLayers.Marker(new OpenLayers.LonLat(lon,lat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject()), icon.clone());
     marker.events.register("mouseover", marker, function(e){
-		window.status = name;
+		$("#from").attr("value",name);
+		$("#from").keyup();
 		OpenLayers.Event.stop(e);
 		});
 		marker.events.register("mouseout", marker, function(e){
@@ -96,7 +127,9 @@ function addStage(lat,lon,id,name) {
 
 <div id="view">
 	<div class="leftCol">
-		{% for co in changeovers %}
+	  {% for p in paths %}
+	  <div>
+		{% for co in p.changeovers %}
 		<h3>
 			From
 			<a href="{% url show-stage co.start_stage.id %}">
@@ -117,6 +150,7 @@ function addStage(lat,lon,id,name) {
 		{% endfor %}
 		{% endfor %}
 		<hr />
+	  </div>{% endfor %}
 	</div>
 	<div id="map"></div>
 	<div class="clearfloat"></div>
