@@ -124,6 +124,7 @@ INSTALLED_APPS = (
     'wtfimb.routes',
     'wtfimb.api',
     'wtfimb.janitor',
+    'wtfimb.htfs',
     
     'registration',
     'django_authopenid',

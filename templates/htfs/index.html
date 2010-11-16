@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% block title %} HTFS {% endblock %}
+{% block main %}
+<h2>HTFS Page</h2>
+<ul>
+   <li><a href="{% url agency_txt %}">agency.txt</a></li>
+   <li><a href="{% url stops_txt %}">stops.txt</a></li>
+   <li><a href="{% url stages_txt %}">stages.txt</a></li>
+   <li><a href="{% url routes_txt %}">routes.txt</a></li>
+   <li><a href="{% url trips_txt %}">trips.txt</a></li>
+   <li><a href="{% url stop_times_txt %}">stop_times.txt</a></li>
+   <li><a href="{% url calendar_txt %}">calendar.txt</a></li>
+   <li><a href="{% url calendar_dates_txt %}">calendar_dates.txt</a></li>
+   <li><a href="{% url fare_attributes_txt %}">fare_attributes.txt</a></li>
+   <li><a href="{% url fare_rules_txt %}">fare_rules.txt</a></li>
+   <li><a href="{% url shapes_txt %}">shapes.txt</a></li>
+   <li><a href="{% url frequencies_txt %}">frequencies.txt</a></li>
+   <li><a href="{% url transfers_txt %}">transfers.txt</a></li>
+   <li><a href="{% url carriers_txt %}">carriers.txt</a></li>
+</ul>
+{% endblock %}
