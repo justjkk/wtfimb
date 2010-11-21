@@ -1,0 +1,16 @@
+from models import *
+from django.contrib.gis import admin
+admin.site.register(Agency)
+admin.site.register(Stop, admin.OSMGeoAdmin)
+admin.site.register(Stage, admin.OSMGeoAdmin)
+admin.site.register(Route)
+admin.site.register(Trip)
+admin.site.register(StopTime)
+admin.site.register(Calendar)
+admin.site.register(CalendarDate)
+admin.site.register(FareAttribute)
+admin.site.register(FareRule)
+admin.site.register(Shape, admin.OSMGeoAdmin)
+admin.site.register(Frequency)
+admin.site.register(Transfer)
+admin.site.register(Carrier)
