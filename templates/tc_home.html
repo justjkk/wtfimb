@@ -1,0 +1,16 @@
+{% extends "city_home.html" %}
+
+{% block ImportantLocations %}
+
+{% endblock %}
+
+{% block SpecialRoutes %}
+
+{% endblock %}
+
+{% block Contribute %}
+	<a class="box page" href="/{{ city }}/mapped/stages">Mapped Stages</a>
+	<a class="box page" href="/{{ city }}/unmapped/stages">Unmapped Stages</a>
+	<a class="box page" href="/{{ city }}/unmapped/routes">Unmapped Routes</a>
+	<a class="box page" href="/{{ city }}/janitor/inconsistent/routes/4">Erroneous Routes</a>
+{% endblock %}
