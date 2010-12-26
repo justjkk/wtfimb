@@ -3,14 +3,17 @@ from django.contrib.gis import admin
 from django.core.urlresolvers import reverse
 
 from reversion.admin import VersionAdmin
+from autocomplete.admin import AutocompleteModelAdmin, AutocompleteTargetModelAdmin
 
 class RouteStageInline(admin.TabularInline):
-    model = RouteStage 
-    extra = 1 
+    model = RouteStage
+    autocomplete_fields = ('stage')
+    extra = 1
     ordering = ['stage__display_name']
 
-class RouteAdmin(admin.OSMGeoAdmin,VersionAdmin):
+class RouteAdmin(admin.OSMGeoAdmin,VersionAdmin, AutocompleteModelAdmin):
     ordering = ['city','display_name']
+    autocomplete_fields = ('start','end')
     list_display = ('display_name', 'route_view_link', 'types', 'city',  'start', 'end', 'has_unmapped_stages')
 
     def has_unmapped_stages(self, obj):

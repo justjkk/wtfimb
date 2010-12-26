@@ -4,12 +4,14 @@ from reversion.admin import VersionAdmin
 from routes.models import RouteStage
 from django.core.urlresolvers import reverse
 
+from autocomplete.admin import AutocompleteModelAdmin, AutocompleteTargetModelAdmin
+
 class RouteStageInline(admin.TabularInline):
     model = RouteStage 
     extra = 1 
     ordering = ['stage__display_name']
 
-class StageAdmin(admin.OSMGeoAdmin,VersionAdmin):
+class StageAdmin(admin.OSMGeoAdmin,VersionAdmin, AutocompleteTargetModelAdmin):
     list_display = ('display_name',
                     'view_stage_link',
                     'city',
