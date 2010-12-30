@@ -18,12 +18,11 @@ def format_datetime(data_row):
 def csv_response(data, data_caption):
    response = HttpResponse(mimetype='text/csv')
    response['Content-Disposition'] = 'attachment'
-   header_writer = csv.writer(response)
-   header_writer.writerow(data_caption)
-   content_writer = csv.DictWriter(response, data_caption, extrasaction='ignore')
+   csv_writer = csv.DictWriter(response, data_caption, extrasaction='ignore')
+   csv_writer.writeheader()
    for data_row in data:
       formatted_data_row = format_datetime(data_row.__dict__)
-      content_writer.writerow(formatted_data_row)
+      csv_writer.writerow(formatted_data_row)
    return response
 
 def agency_txt(request):
